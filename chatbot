@@ -215,6 +215,7 @@ let check str all =
     in
     joke_ctr := !joke_ctr + 1;
     List.nth jokes (!joke_ctr mod 3)  
+  | "help" | "Help" -> "I can calculate any thing to you, convert from unit to another, recommend you a (movie/book/game), talk with you and tell you jokes :)"
   | s -> check_two (s) (all)
 ;;
 
@@ -399,6 +400,9 @@ let rec process_input () =
     let tokens = lexical_input (makeLower !input) in
 
     match tokens with
+    | "What can you do?" :: _ | "what can you do?" :: _ | "What can you do" :: _ | "what can you do" :: _ ->
+      "I can calculate any thing to you, convert from unit to another, recommend you a (movie/book/game), talk with you and tell you jokes :)";
+      process_input ()
     | "calculate" :: line :: _ ->
       let expr, _ = parse_expr line 0 in
       let result = eval expr in
