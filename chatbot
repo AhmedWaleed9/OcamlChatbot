@@ -1,0 +1,436 @@
+let makeLower str = 
+  String.lowercase_ascii (str)
+;;
+
+(*To handle the strings*)
+let remove_non_alph_chars str =
+  let ch = str.[0] in 
+  if ch >= '0' && ch <= '9' then str
+  else     
+  let filtered_str = String.map 
+  (
+  fun c -> if  c >= 'A' && c <= 'Z' || c >= 'a' && c <= 'z' || c >= '0' && c <= '9'  then c 
+  else ' '
+  ) str in
+  String.trim filtered_str
+;;
+
+
+let rec sleep_ms ms =
+  let start_time = Sys.time () in
+  let wait_until = start_time +. (float_of_int ms /. 1000.0) in
+  let current_time = ref start_time in
+  while !current_time < wait_until do
+    current_time := Sys.time ()
+  done
+;;
+
+let type_with_delay str delay_ms =
+  let len = String.length str in
+  for i = 0 to len - 1 do
+    print_char str.[i];
+    flush stdout;
+    sleep_ms delay_ms
+  done
+;;
+
+(*Ctr to avoid repeating the same response if we have list of responses*)
+let joke_ctr = ref 0;;
+let movie_ctr = ref 0;;
+let book_ctr = ref 0;;
+let game_ctr = ref 0;;
+
+(*Return the list og genres*)
+let get_by_genre genre recommendations =
+  List.assoc genre recommendations
+;;
+
+let recommendations_film = [
+  ("action", ["Inception"; "The Dark Knight"; "Mad Max: Fury Road"]);
+  ("comedy", ["Anchorman: The Legend of Ron Burgundy"; "Superbad"; "Bridesmaids"]);
+  ("drama", ["The Shawshank Redemption"; "The Godfather"; "Schindler's List"])
+];;
+
+let recommendations_book = [
+  ("fiction", ["To Kill a Mockingbird"; "1984"; "The Great Gatsby"]);
+  ("mystery", ["Gone Girl"; "The Girl with the Dragon Tattoo"; "The Da Vinci Code"]);
+  ("fantasy", ["Harry Potter and the Sorcerer's Stone"; "The Hobbit"; "A Game of Thrones"])
+];;
+
+let recommendations_game = [
+  ("action", ["Grand Theft Auto V"; "Call of Duty: Warzone"; "Assassin's Creed Valhalla"]);
+  ("sports", ["FIFA 22"; "NBA 2K22"; "Madden NFL 22"]);
+  ("adventure", ["The Legend of Zelda: Breath of the Wild"; "Red Dead Redemption 2"; "God of War"])
+];;
+
+let get_book_recommendation () =
+  let lst = get_by_genre genre recommendations in 
+  book_ctr := !book_ctr+1;
+  List.nth lst (!book_ctr)
+;;
+
+let get_game_recommendation () =
+  let lst = get_by_genre genre recommendations in 
+  game_ctr := !game_ctr+1;
+  List.nth lst (!game_ctr)
+;;
+
+(*Key words*)
+(*Check any ywo words that are related two each other*)
+let check_two word str =
+  match word with
+  | "movie" | "movies" | "film" | "films" ->
+    if List.exists (fun w2 -> makeLower w2 = "action") str then
+      let lst = get_by_genre "action" recommendations_film in
+      movie_ctr := !movie_ctr + 1;
+      List.nth lst (!movie_ctr mod 3)
+    else if List.exists (fun w2 -> makeLower w2 = "comedy") str then
+      let lst2 = get_by_genre "comedy" recommendations_film in
+      movie_ctr := !movie_ctr + 1;
+      List.nth lst2 (!movie_ctr mod 3)
+    else if List.exists (fun w2 -> makeLower w2 = "drama") str then
+      let lst3 = get_by_genre "drama" recommendations_film in
+      movie_ctr := !movie_ctr + 1;
+      List.nth lst3 (!movie_ctr mod 3)
+    else
+      "I like movies too!"
+  | "book" | "books" | "novel" | "novels" ->
+    if List.exists (fun w2 -> makeLower w2 = "fiction") str then
+      let lst = get_by_genre "fiction" recommendations_book in
+      book_ctr := !book_ctr + 1;
+      List.nth lst (!book_ctr mod 3)
+    else if List.exists (fun w2 -> makeLower w2 = "mystery") str then
+      let lst2 = get_by_genre "mystery" recommendations_book in
+      book_ctr := !book_ctr + 1;
+      List.nth lst2 (!book_ctr mod 3)
+    else if List.exists (fun w2 -> makeLower w2 = "fantasy") str then
+      let lst3 = get_by_genre "fantasy" recommendations_book in
+      book_ctr := !book_ctr + 1;
+      List.nth lst3 (!book_ctr mod 3)
+    else
+      "Reading books is awesome!"
+  | "game" | "games" | "gaming" ->
+if List.exists (fun w2 -> makeLower w2 = "action") str then
+      let lst = get_by_genre "action" recommendations_game in
+      game_ctr := !game_ctr + 1;
+      List.nth lst (!game_ctr mod 3)
+    else if List.exists (fun w2 -> makeLower w2 = "sports") str then
+      let lst2 = get_by_genre "sports" recommendations_game in
+      game_ctr := !game_ctr + 1;
+      List.nth lst2 (!game_ctr mod 3)
+    else if List.exists (fun w2 -> makeLower w2 = "adventure") str then
+      let lst3 = get_by_genre "adventure" recommendations_game in
+      game_ctr := !game_ctr + 1;
+      List.nth lst3 (!game_ctr mod 3)
+    else
+      "Gaming is my hobby ;)"
+    
+  | "love" ->
+    if List.exists (fun w2 -> makeLower w2 = "you") str then
+      "I love you too!"
+    else
+      "That's wonderful! When you love someone, you experience deep affection, attachment, and care towards that person, which can bring joy and fulfillment to your life."
+  | "happiness" ->
+    if List.exists (fun w2 -> makeLower w2 = "joy") str then
+      "Happiness and joy go hand in hand. They are positive emotions that can bring a sense of well-being and contentment."
+    else
+      "Happiness is a state of being happy or feeling content. It can come from various sources such as relationships, achievements, and personal fulfillment."
+  | "success" ->
+    if List.exists (fun w2 -> makeLower w2 = "achievement") str then
+      "Success and achievement often go together. Achieving your goals and overcoming challenges can lead to a sense of success and fulfillment."
+    else
+      "Success is the accomplishment of an aim or purpose. It can be measured in various ways, such as achieving goals, making progress, or reaching a desired outcome."
+  | "fun" ->
+    if List.exists (fun w2 -> makeLower w2 = "laughter") str then
+      "Having fun and experiencing laughter can be enjoyable and uplifting. It can help relieve stress and create positive memories."
+    else
+      "Fun is an enjoyable experience or activity that brings amusement, entertainment, and pleasure."
+  | "friendship" ->
+    if List.exists (fun w2 -> makeLower w2 = "bond") str then
+      "Friendship is a special bond between individuals characterized by mutual affection, trust, and support."
+    else
+      "Friendship is a relationship of mutual affection and trust between two or more people."
+  | "knowledge" ->
+    if List.exists (fun w2 -> makeLower w2 = "wisdom") str then
+      "Knowledge and wisdom are closely related. Knowledge is the information and understanding acquired through learning and experience, while wisdom is the ability to apply knowledge wisely."
+    else
+      "Knowledge is the information, skills, and understanding acquired through learning, experience, or study."
+  | "creativity" ->
+    if List.exists (fun w2 -> makeLower w2 = "imagination") str then
+      "Creativity and imagination go hand in hand. Creativity is the ability to generate new ideas, concepts, or solutions, while imagination is the capacity to create mental images or scenarios."
+    else
+  "Creativity is the ability to use imagination and originality to produce unique and valuable ideas, works of art, or solutions."
+  | "excited" ->
+    if List.exists (fun w2 -> makeLower w2 = "happy" || makeLower w2 = "thrilled") str then
+      "Being excited is a wonderful feeling! It's a mix of anticipation, enthusiasm, and joy that often accompanies something you're looking forward to."
+    else
+      "Excitement is a feeling of enthusiasm, anticipation, or eagerness about something."
+  | "inspiration" ->
+    if List.exists (fun w2 -> makeLower w2 = "creativity" || makeLower w2 = "motivation") str then
+      "Inspiration can fuel creativity and motivation. It's the spark that ignites ideas and drives individuals to achieve their goals."
+    else
+      "Inspiration is a powerful force that can come from various sources and stimulate creativity, motivation, and enthusiasm."
+  | "dream" ->
+    if List.exists (fun w2 -> makeLower w2 = "aspiration" || makeLower w2 = "desire") str then
+      "Dreams are powerful aspirations and desires that motivate us to pursue our goals and make them a reality."
+    else
+      "Dreams are imaginary experiences or ideas that occur during sleep or a strong desire or goal for the future."
+  | "adventure" ->
+    if List.exists (fun w2 -> makeLower w2 = "exploration" || makeLower w2 = "thrill") str then
+      "Embarking on an adventure is an exciting journey filled with exploration, new experiences, and a sense of thrill and discovery."
+    else
+      "Adventure is an exciting or unusual experience that involves taking risks, exploring the unknown, or seeking excitement."
+  | "peace" ->
+    if List.exists (fun w2 -> makeLower w2 = "tranquility" || makeLower w2 = "serenity") str then
+      "Peace is a state of tranquility, harmony, and freedom from disturbance. It's a sense of calmness and inner contentment."
+    else
+      "Peace refers to a state of calmness, tranquility, and absence of conflict or disturbance."
+  | "passion" ->
+    if List.exists (fun w2 -> makeLower w2 = "enthusiasm" || makeLower w2 = "intensity") str then
+      "Passion is a strong and intense emotion or enthusiasm towards something. It's the driving force that fuels dedication and commitment."
+    else
+      "Passion is a powerful and intense emotion or enthusiasm for something you deeply care about."
+  | _ -> "Please say something. I will try to help"
+;;
+
+
+(*Search for the key words*)
+let check str all =
+  match str with
+  | "hi" -> "Hi, how can I help you?"
+  | "hello" -> "Hello, how can I help you?"
+  | "morning" -> "Good morning!, how can I help you?"
+  | "sad" | "saad" | "sadd" | "saaad" | "im sad" 
+  | "bad" |"dba" | "baad" | "bbad" | "baaad" | "baadd" |"im bad" | "am i bad?"
+  | "broken" | "brokn" | "borken" | "boroken" | "broke" | "brokenn" | "brooken" | "bbroken"| "im broken"
+  | "depressed" | "depreseed" | "deppressed" | "depresed" | "depressedd" | "depresssed" | "depreessed" | "dpressed"| "im depressed"
+  | "dead" | "death" | "suicide" | "stressed" | "lost" | "failed" ->
+    "Sorry to hear that, you can seek professional help with a therapist and I hope it can help get things better for you"
+  | "happy" | "enjoying" | "like" ->
+    "Cool! That's a good thing to hear, but still, as an AI language, I don't have feelings or emotions, so I'm just pretending to be happy with you."
+  | "exam" | "quiz" | "homework" | "work" ->
+    "Since you have something to work on, I recommend prioritizing your work from the most important and hardest things so the rest will be easier. If you couldn't do them, there isn't much worry as the most important is done. Wish you luck :D"
+  | "win" | "winner" | "achievement" | "first" | "primo" ->
+    "Congratulations! I'm glad to know that. Keep up the good work!"
+  | "angry" | "anger" | "angery" | "angryy" | "im angry"->
+    "Sorry to hear that , anger is a powerful emotion that can make a person take decisions they regret , dont let it get the best of you!"
+  | "bored" | "boredom" | "boring" | "borinng" | "boredomm" | "im bored" -> "Sorry to know that. I can give you some tips to help you overcome this , try new activities or a hobby for you or maybe watch a movie or connect with friends , reading books also helps with boredom , all those things can help you overcome being bored."
+  | "im lonely" | "loneliness"| "lonliness" | "lonely" | "lonly" ->
+    "Im sorry to hear that. It's important to remember that feeling lonely is a common experience and you are not alone having this feeling , you can try to overcoming by joining social events or some university teams in college , and remember its okay to feel lonely from time to time."
+  | "im scared" | "fear" | "scared" | "feer" ->
+    "Its okay to be scared but you have to identify what exactly is scaring you , also try to take deep breaths since it helps dealing with fear , seeking support from family members is also a big step in overcoming fear."
+  | "joke" | "funny" ->
+    let jokes = ["Why don't scientists trust atoms? Because they make up everything!";
+                 "Why did the scarecrow win an award? Because he was outstanding in his field!";
+                 "What did the grape say when it got stepped on? Nothing, it just let out a little wine!"]
+    in
+    joke_ctr := !joke_ctr + 1;
+    List.nth jokes (!joke_ctr mod 3)  
+  | s -> check_two (s) (all)
+;;
+
+
+(*Convertor*)
+let converts value =
+  let convert_fn = 
+    fun str -> fun tostr -> 
+      match str with
+      | "km" when tostr = "mile" -> value *. 0.621371
+      | "km" when tostr = "m" -> value *. 1000.0 
+      | "kg" when tostr = "g" -> value *. 1000.0
+      | "ton" when tostr = "kg" -> value *. 1000.0
+      | "mile" when tostr = "km" -> value /. 0.621371
+      | "m" when tostr = "km" -> value /. 1000.0
+      | "g" when tostr = "kg" -> value /. 1000.0
+      | "kg" when tostr = "ton" -> value /. 1000.0
+      | "kg" when tostr = "lbs" -> value *. 2.20462
+      | "lbs" when tostr = "kg" -> value /. 2.20462
+      | "cm" when tostr = "inch" -> value /. 2.54
+      | "inch" when tostr = "cm" -> value *. 2.54
+      | "m" when tostr = "cm" -> value *. 100.0
+      | "cm" when tostr = "m" -> value /. 100.0
+      | "g" when tostr = "mg" -> value *. 1000.0
+      | "mg" when tostr = "g" -> value /. 1000.0
+      | "oz" when tostr = "g" -> value *. 28.3495
+      | "g" when tostr = "oz" -> value /. 28.3495
+      | _ -> 0.0
+  in
+  convert_fn
+;;
+
+
+
+(*Calculater*)
+(* Define type for expression *)
+type expr =
+  | Number of int
+  | Add of expr * expr
+  | Subtract of expr * expr
+  | Multiply of expr * expr
+  | Divide of expr * expr
+  | Parentheses of expr
+;;
+
+(* Parse a single number *)
+let rec parse_number s i =
+  let rec aux i acc =
+    if i >= String.length s then (Number acc, i)
+    else match s.[i] with
+      | '0'..'9' as c ->
+          let n = Char.code c - Char.code '0' in
+          aux (i+1) (acc * 10 + n)
+      | _ -> (Number acc, i)
+  in aux i 0
+
+(* Parse parentheses *)
+and parse_parentheses s i =
+  let expr, i = parse_expr s (i+1) in
+  match s.[i] with
+  | ')' -> (Parentheses expr, i+1)
+  | _ -> failwith "unmatched parentheses"
+
+(* Parse expressions *)
+and parse_expr s i =
+  let rec aux i acc =
+    if i >= String.length s then acc, i
+    else match s.[i] with
+      | '+' ->
+          let rhs, i = parse_term s (i+1) in
+          aux i (Add (acc, rhs))
+      | '-' ->
+          let rhs, i = parse_term s (i+1) in
+          aux i (Subtract (acc, rhs))
+      | _ -> acc, i
+  in
+  let lhs, i = parse_term s i in
+  aux i lhs
+
+(* Parse terms *)
+and parse_term s i =
+  let rec aux i acc =
+    if i >= String.length s then acc, i
+    else match s.[i] with
+      | '*' ->
+          let rhs, i = parse_factor s (i+1) in
+          aux i (Multiply (acc, rhs))
+      | '/' ->
+          let rhs, i = parse_factor s (i+1) in
+          aux i (Divide (acc, rhs))
+      | _ -> acc, i
+  in
+  let lhs, i = parse_factor s i in
+  aux i lhs
+
+(* Parse factors *)
+and parse_factor s i =
+  if i >= String.length s then failwith "unexpected end of input"
+  else match s.[i] with
+    | '(' -> parse_parentheses s i
+    | '0'..'9' -> parse_number s i
+    | _ -> failwith "unexpected character"
+;;
+(* Evaluate an expression *)
+let rec eval = function
+  | Number n -> n
+  | Add (lhs, rhs) -> eval lhs + eval rhs
+  | Subtract (lhs, rhs) -> eval lhs - eval rhs
+  | Multiply (lhs, rhs) -> eval lhs * eval rhs
+  | Divide (lhs, rhs) -> eval lhs / eval rhs
+  | Parentheses expr -> eval expr
+;;
+
+let lexical_input input =
+  let rec lexical_tokens acc current_token = function
+    | [] ->
+        if current_token <> "" then acc @ [current_token]
+        else List.rev acc
+    | c :: rest ->
+        if c = ' ' then
+          if current_token <> "" then
+            lexical_tokens (acc @ [current_token]) "" rest
+          else
+            lexical_tokens acc "" rest
+        else
+          lexical_tokens acc (current_token ^ (String.make 1 c)) rest
+  in
+  lexical_tokens [] "" (List.of_seq (String.to_seq input))
+;;
+
+
+(*To clear the screen*)
+let clear_screen () =
+  let command =
+    match Sys.os_type with
+    | "Win32" | "Cygwin" -> "cls"
+    | _ -> "clear"
+  in
+  let _ = Sys.command command in
+  ()
+;;
+
+
+(*Loading...*)
+let wait_a_moment str rep =
+  let len = String.length rep in
+  clear_screen ();
+  for i = 0 to 3 do
+    print_string str;
+    for j = 0 to len - 1 do
+      print_char rep.[j];
+      flush stdout;
+      sleep_ms 150
+    done;
+    clear_screen ()
+  done
+;;
+
+let intro () =
+  let text = "Loading" in
+  let rep = "..." in
+  wait_a_moment text rep;
+  type_with_delay ("Hello, I'm Sawi here to assist you!") (50);
+  print_endline "";
+;;
+
+
+(*Where we take the input and match the string with other functions*)
+let rec process_input () =
+  let input = read_line () in
+  if input = "stop" then
+    print_string "See you soon :)"
+  else (
+    let tokens = lexical_input (makeLower input) in
+
+    match tokens with
+    | "calculate" :: line :: _ ->
+      let expr, _ = parse_expr line 0 in
+      let result = eval expr in
+      type_with_delay ("Result: " ^ string_of_int result) 100;
+      print_endline "";
+      process_input ()
+    | "convert" :: value :: from_unit :: "to" :: to_unit :: _ ->
+      let float_value = float_of_string value in
+      let conversion_fn = converts float_value from_unit to_unit in
+      (match conversion_fn with
+      | 0.0 -> print_endline "Invalid conversion units"
+      | result -> type_with_delay (("Result: " ^ string_of_float result ^ " " ^ to_unit)) 100);
+      print_endline "";
+      process_input ()
+    | _ ->
+      let response = List.find_opt (fun token -> check token tokens <> "Please say something. I will try to help") tokens in
+      (match response with
+      | Some resp -> type_with_delay (check (remove_non_alph_chars (resp)) tokens) 40
+      | None -> type_with_delay "Please say something. I will try to help" 20
+      );
+    print_endline "";
+    process_input ()
+  )
+;;
+
+(*main function*)
+let main () =
+  intro ();
+  process_input ()
+;;
+
+main ()
