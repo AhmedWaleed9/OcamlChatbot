@@ -63,17 +63,6 @@ let recommendations_game = [
   ("adventure", ["The Legend of Zelda: Breath of the Wild"; "Red Dead Redemption 2"; "God of War"])
 ];;
 
-let get_book_recommendation () =
-  let lst = get_by_genre genre recommendations in 
-  book_ctr := !book_ctr+1;
-  List.nth lst (!book_ctr)
-;;
-
-let get_game_recommendation () =
-  let lst = get_by_genre genre recommendations in 
-  game_ctr := !game_ctr+1;
-  List.nth lst (!game_ctr)
-;;
 
 (*Key words*)
 (*Check any ywo words that are related two each other*)
@@ -392,14 +381,22 @@ let intro () =
   print_endline "";
 ;;
 
+let prev = ref "";;
+let input = ref "";;
 
 (*Where we take the input and match the string with other functions*)
 let rec process_input () =
-  let input = read_line () in
-  if input = "stop" then
+  input := read_line ();
+  
+  if !input = "more" then
+    input := !prev
+  else  prev := !input;
+  
+  
+  if !input = "stop" then
     print_string "See you soon :)"
   else (
-    let tokens = lexical_input (makeLower input) in
+    let tokens = lexical_input (makeLower !input) in
 
     match tokens with
     | "calculate" :: line :: _ ->
